@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34202.233
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LittleGymManagementBackend", "LittleGymManagementBackend.csproj", "{8415C0C3-AC90-4021-9291-BE41D85B5052}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8415C0C3-AC90-4021-9291-BE41D85B5052}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8415C0C3-AC90-4021-9291-BE41D85B5052}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8415C0C3-AC90-4021-9291-BE41D85B5052}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8415C0C3-AC90-4021-9291-BE41D85B5052}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BA234823-9ECA-4DCC-AC40-1A57E6ACE0E3}
+	EndGlobalSection
+EndGlobal
