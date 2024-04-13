@@ -26,14 +26,33 @@ namespace LittleGymManagementBackend.Controllers
             return response;
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("login")]
-        public Response login(LoginRequest loginRequest)
+        public IActionResult Login(string email, string password)
         {
             DAL dal = new DAL();
             SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("LittleGymManagementDb").ToString());
-            Response response = dal.login(loginRequest.Email, loginRequest.Password, connection);
-            return response;
+            Response response = dal.login(email, password, connection);
+
+            if (response.StatusCode == 200)
+            {
+                var responseData = new
+                {
+                    StatusCode = response.StatusCode,
+                    StatusMessage = response.StatusMessage,
+                    UserID = response.user?.ID,
+                    UserType = response.user?.Type
+                };
+                return Ok(responseData);
+            }
+            else
+            {
+                return BadRequest(new
+                {
+                    StatusCode = response.StatusCode,
+                    StatusMessage = response.StatusMessage
+                });
+            }
         }
 
         [HttpPost]
