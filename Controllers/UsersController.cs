@@ -1,4 +1,5 @@
 ﻿using LittleGymManagementBackend.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System.Data.SqlClient;
@@ -22,6 +23,7 @@ namespace LittleGymManagementBackend.Controllers
             Response response = new Response();
             DAL dal = new DAL();
             SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("LittleGymManagementDb").ToString());
+            
             response = dal.register(users, connection);
             return response;
         }

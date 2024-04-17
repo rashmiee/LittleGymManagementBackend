@@ -14,8 +14,11 @@ namespace LittleGymManagementBackend.Models
             cmd.Parameters.AddWithValue("@LastName", users.LastName);
             cmd.Parameters.AddWithValue("@Email", users.Email);
             cmd.Parameters.AddWithValue("@Password", users.Password);
+
+            // Hardcode Type and Status
             cmd.Parameters.AddWithValue("@Type", "Users");
             cmd.Parameters.AddWithValue("@Status", 1);
+
             connection.Open();
             int i = cmd.ExecuteNonQuery();
             connection.Close();
