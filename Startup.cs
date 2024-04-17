@@ -28,27 +28,15 @@ namespace LittleGymManagementBackend
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
-            //services.AddCors(options =>
-            //{
-            //    options.AddDefaultPolicy(
-            //        policy =>
-            //        {
-            //            policy.WithOrigins("http://localhost:3000") // ReactApp Url
-            //                .AllowAnyHeader()
-            //                .AllowAnyMethod()
-            //                .AllowCredentials();
-            //        });
-            //});
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowSpecificOrigin",
-                    builder =>
-                    {
-                        builder.WithOrigins("http://localhost:3000") // Replace with your allowed domain(s)
-                               .AllowAnyHeader()
-                               .AllowAnyMethod();
+                options.AddPolicy("AllowReactApp",
+                builder => builder
+                    .WithOrigins("http://localhost:3000")
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials());
                     });
-            });
             services.AddControllers();
         }
         // This method gets called by the runtime.Use this method to configure the HTTP request pipeline.
@@ -67,12 +55,12 @@ namespace LittleGymManagementBackend
 
             // Configure middleware
             app.UseHttpsRedirection();
-            app.UseCors("AllowSpecificOrigin");
+            app.UseCors("AllowReactApp");
             app.UseRouting();
             app.UseAuthorization();
 
             // Enable CORS for requests from http://localhost:3000
-            //app.UseCors("AllowLocalhost3000");
+            app.UseCors("AllowLocalhost3000");
             //app.UseCors(options => options.WithOrigins("*").AllowAnyMethod().AllowAnyHeader() );
 
             app.UseEndpoints(endpoints =>
