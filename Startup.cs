@@ -28,12 +28,23 @@ namespace LittleGymManagementBackend
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
+            //services.AddCors(options =>
+            //{
+            //    options.AddDefaultPolicy(
+            //        policy =>
+            //        {
+            //            policy.WithOrigins("http://localhost:3000") // ReactApp Url
+            //                .AllowAnyHeader()
+            //                .AllowAnyMethod()
+            //                .AllowCredentials();
+            //        });
+            //});
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowLocalhost3000",
+                options.AddPolicy("AllowSpecificOrigin",
                     builder =>
                     {
-                        builder.WithOrigins("http://localhost:3000")
+                        builder.WithOrigins("http://localhost:3000") // Replace with your allowed domain(s)
                                .AllowAnyHeader()
                                .AllowAnyMethod();
                     });
@@ -56,11 +67,13 @@ namespace LittleGymManagementBackend
 
             // Configure middleware
             app.UseHttpsRedirection();
+            app.UseCors("AllowSpecificOrigin");
             app.UseRouting();
             app.UseAuthorization();
 
             // Enable CORS for requests from http://localhost:3000
-            app.UseCors("AllowLocalhost3000");
+            //app.UseCors("AllowLocalhost3000");
+            //app.UseCors(options => options.WithOrigins("*").AllowAnyMethod().AllowAnyHeader() );
 
             app.UseEndpoints(endpoints =>
             {
