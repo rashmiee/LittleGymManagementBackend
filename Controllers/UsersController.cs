@@ -77,5 +77,41 @@ namespace LittleGymManagementBackend.Controllers
             response = dal.updateProfile(users, connection);
             return response;
         }
+
+        [HttpPost]
+        [Route("userApproval")]
+        public Response UserApproval(Users users)
+        {
+            Response response = new Response();
+            DAL dal = new DAL();
+            SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("LittleGymManagementDb").ToString());
+
+            response = dal.userApproval(users, connection);
+            return response;
+        }
+
+        [HttpPost]
+        [Route("teacherRegistration")]
+        public Response teachersRegistration(Teachers teacher)
+        {
+            Response response = new Response();
+            DAL dal = new DAL();
+            SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("LittleGymManagementDb").ToString());
+
+            response = dal.teachersRegistration(teacher, connection);
+            return response;
+        }
+
+        [HttpPost]
+        [Route("deleteTeacher")]
+        public Response deleteTeacher(Teachers teacher)
+        {
+            Response response = new Response();
+            DAL dal = new DAL();
+            SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("LittleGymManagementDb").ToString());
+
+            response = dal.deleteTeacher(teacher, connection);
+            return response;
+        }
     }
 }
