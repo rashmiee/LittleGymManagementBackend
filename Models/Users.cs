@@ -12,6 +12,7 @@
         public DateTime CreatedOn { get; set; }
         public string? PhoneNo { get; set; }
         public int? IsApproved { get; set; }
+        public string? UserEmail { get; set;}
 
     }
 }

@@ -113,5 +113,33 @@ namespace LittleGymManagementBackend.Controllers
             response = dal.deleteTeacher(teacher, connection);
             return response;
         }
+
+        [HttpGet]
+        [Route("teachers")]
+        public IActionResult GetTeachers()
+        {
+            List<Users> teachers = new List<Users>();
+            DAL dal = new DAL();
+            SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("LittleGymManagementDb").ToString());
+
+            // Assuming there's a method in DAL to fetch teachers
+            teachers = dal.GetTeachers(connection);
+
+            return Ok(teachers);
+        }
+
+        [HttpGet]
+        [Route("children")]
+        public IActionResult GetChildren(string userEmail)
+        {
+            List<Users> children = new List<Users>();
+            DAL dal = new DAL();
+            SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("LittleGymManagementDb"));
+
+            // Assuming there's a method in DAL to fetch children based on user email
+            children = dal.GetChildren(connection, userEmail);
+
+            return Ok(children);
+        }
     }
 }

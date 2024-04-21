@@ -34,8 +34,12 @@ namespace LittleGymManagementBackend.Models
                 cmd.Parameters.AddWithValue("@PhoneNo", users.PhoneNo);
                 cmd.Parameters.AddWithValue("@Password", users.Password);
 
-                // Hardcode Type and Status
-                cmd.Parameters.AddWithValue("@Type", "Users");
+                // Check if Type is provided from frontend, if not, default to 'Users'
+                string type = !string.IsNullOrEmpty(users.Type) ? users.Type : "Users";
+                cmd.Parameters.AddWithValue("@Type", type);
+
+                cmd.Parameters.AddWithValue("@UserEmail", string.IsNullOrEmpty(users.UserEmail) ? (object)DBNull.Value : users.UserEmail);
+                // Hardcoding Status to 1 for now, modify if needed
                 cmd.Parameters.AddWithValue("@Status", 1);
 
                 connection.Open();
@@ -292,5 +296,103 @@ namespace LittleGymManagementBackend.Models
             }
             return response;
         }
+
+        public List<Users> GetTeachers(SqlConnection connection)
+        {
+            List<Users> teachers = new List<Users>();
+
+            try
+            {
+                // Open the connection
+                connection.Open();
+
+                // Define the SQL query
+                string query = "SELECT FirstName, LastName, Email, PhoneNo FROM Users WHERE Type = 'Teachers'";
+
+                // Create a SqlCommand object to execute the query
+                SqlCommand command = new SqlCommand(query, connection);
+
+                // Execute the query and get the results
+                SqlDataReader reader = command.ExecuteReader();
+
+                // Read the results and add teachers to the list
+                while (reader.Read())
+                {
+                    Users teacher = new Users();
+                    teacher.FirstName = reader["FirstName"].ToString();
+                    teacher.LastName = reader["LastName"].ToString();
+                    teacher.Email = reader["Email"].ToString();
+                    teacher.PhoneNo = reader["PhoneNo"].ToString();
+                    teachers.Add(teacher);
+                }
+
+                // Close the reader
+                reader.Close();
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions
+                Console.WriteLine("Error: " + ex.Message);
+            }
+            finally
+            {
+                // Close the connection
+                if (connection.State == ConnectionState.Open)
+                    connection.Close();
+            }
+
+            return teachers;
+        }
+
+        public List<Users> GetChildren(SqlConnection connection, string userEmail)
+        {
+            List<Users> children = new List<Users>();
+
+            try
+            {
+                // Open the connection
+                connection.Open();
+
+                // Define the SQL query with parameters
+                string query = "SELECT FirstName, LastName, Email, PhoneNo FROM Users WHERE Type = 'Child' AND UserEmail = @UserEmail";
+
+                // Create a SqlCommand object to execute the query
+                SqlCommand command = new SqlCommand(query, connection);
+
+                // Add parameter for UserEmail
+                command.Parameters.AddWithValue("@UserEmail", userEmail);
+
+                // Execute the query and get the results
+                SqlDataReader reader = command.ExecuteReader();
+
+                // Read the results and add children to the list
+                while (reader.Read())
+                {
+                    Users child = new Users();
+                    child.FirstName = reader["FirstName"].ToString();
+                    child.LastName = reader["LastName"].ToString();
+                    child.Email = reader["Email"].ToString();
+                    child.PhoneNo = reader["PhoneNo"].ToString();
+                    children.Add(child);
+                }
+
+                // Close the reader
+                reader.Close();
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions
+                Console.WriteLine("Error: " + ex.Message);
+            }
+            finally
+            {
+                // Close the connection
+                if (connection.State == ConnectionState.Open)
+                    connection.Close();
+            }
+
+            return children;
+        }
+
     }
 }
