@@ -8,30 +8,55 @@ namespace LittleGymManagementBackend.Models
         public Response register(Users users, SqlConnection connection)
         {
             Response response = new Response();
-            SqlCommand cmd = new SqlCommand("sp_register", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@FirstName", users.FirstName);
-            cmd.Parameters.AddWithValue("@LastName", users.LastName);
-            cmd.Parameters.AddWithValue("@Email", users.Email);
-            cmd.Parameters.AddWithValue("@PhoneNo", users.Email);
-            cmd.Parameters.AddWithValue("@Password", users.Password);
-
-            // Hardcode Type and Status
-            cmd.Parameters.AddWithValue("@Type", "Users");
-            cmd.Parameters.AddWithValue("@Status", 1);
-
-            connection.Open();
-            int i = cmd.ExecuteNonQuery();
-            connection.Close();
-            if (i > 0) 
+            try
             {
-                response.StatusCode = 200;
-                response.StatusMessage = "User registered successfully.";
+                // Check if the user already exists
+                SqlCommand checkCmd = new SqlCommand("SELECT COUNT(*) FROM Users WHERE Email = @Email", connection);
+                checkCmd.Parameters.AddWithValue("@Email", users.Email);
+
+                connection.Open();
+                int userCount = (int)checkCmd.ExecuteScalar();
+                connection.Close();
+
+                if (userCount > 0)
+                {
+                    response.StatusCode = 100;
+                    response.StatusMessage = "User registration failed. User with this email already exists.";
+                    return response;
+                }
+
+                // If user doesn't exist, proceed with registration
+                SqlCommand cmd = new SqlCommand("sp_register", connection);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@FirstName", users.FirstName);
+                cmd.Parameters.AddWithValue("@LastName", users.LastName);
+                cmd.Parameters.AddWithValue("@Email", users.Email);
+                cmd.Parameters.AddWithValue("@PhoneNo", users.PhoneNo);
+                cmd.Parameters.AddWithValue("@Password", users.Password);
+
+                // Hardcode Type and Status
+                cmd.Parameters.AddWithValue("@Type", "Users");
+                cmd.Parameters.AddWithValue("@Status", 1);
+
+                connection.Open();
+                int i = cmd.ExecuteNonQuery();
+                connection.Close();
+                if (i > 0)
+                {
+                    response.StatusCode = 200;
+                    response.StatusMessage = "User registered successfully.";
+                }
+                else
+                {
+                    response.StatusCode = 100;
+                    response.StatusMessage = "User registration failed.";
+                }
             }
-            else
+            catch (Exception ex)
             {
+                // Handle the exception
                 response.StatusCode = 100;
-                response.StatusMessage = "User registration failed.";
+                response.StatusMessage = "User registration failed. Error: " + ex.Message;
             }
 
             return response;
@@ -39,17 +64,19 @@ namespace LittleGymManagementBackend.Models
 
         public Response login(string email, string password, SqlConnection connection)
         {
-            SqlDataAdapter da = new SqlDataAdapter("sp_login", connection);
-            da.SelectCommand.CommandType = CommandType.StoredProcedure;
-            da.SelectCommand.Parameters.AddWithValue("@Email", email);
-            da.SelectCommand.Parameters.AddWithValue("@Password", password);
-            DataTable dt = new DataTable();
-            da.Fill(dt);
-            Response response = new Response();
-            if (dt.Rows.Count > 0)
+            try
             {
-                DataRow row = dt.Rows[0];
-                Users user = new Users
+                SqlDataAdapter da = new SqlDataAdapter("sp_login", connection);
+                da.SelectCommand.CommandType = CommandType.StoredProcedure;
+                da.SelectCommand.Parameters.AddWithValue("@Email", email);
+                da.SelectCommand.Parameters.AddWithValue("@Password", password);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                Response response = new Response();
+                if (dt.Rows.Count > 0)
+                {
+                    DataRow row = dt.Rows[0];
+                    Users user = new Users
                 {
                     ID = Convert.ToInt32(row["ID"]),
                     FirstName = Convert.ToString(row["FirstName"]),
@@ -57,17 +84,27 @@ namespace LittleGymManagementBackend.Models
                     Email = Convert.ToString(row["Email"]),
                     Type = Convert.ToString(row["Type"])
                 };
-                response.StatusCode = 200;
-                response.StatusMessage = "User is valid.";
-                response.user = user;
+                    response.StatusCode = 200;
+                    response.StatusMessage = "User is valid.";
+                    response.user = user;
+                }
+                else
+                {
+                    response.StatusCode = 100;
+                    response.StatusMessage = "User is invalid.";
+                    response.user = null;
+                }
+                return response;
             }
-            else
+            catch (Exception ex)
             {
+                // Handle the exception for invalid email or password
+                Response response = new Response();
                 response.StatusCode = 100;
                 response.StatusMessage = "User is invalid.";
                 response.user = null;
+                return response;
             }
-            return response;
         }
 
         public Response viewUser(int ID, SqlConnection connection)
