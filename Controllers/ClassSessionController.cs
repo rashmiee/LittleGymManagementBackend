@@ -71,5 +71,28 @@ namespace LittleGymManagementBackend.Controllers
                 return StatusCode(500, response);
             }
         }
+
+        [HttpPost]
+        [Route("addClassSessionLesson")]
+        public ActionResult<Response> AddLessonToClassSession(int lesson_id, int classSessionId)
+        {
+            Response response = new Response();
+            try
+            {
+                string connectionString = _configuration.GetConnectionString("LittleGymManagementDb");
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    DAL classDAL = new DAL();
+                    response = classDAL.AddLessonToClassSession(lesson_id, classSessionId, connection);
+                }
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500;
+                response.StatusMessage = "An error occurred: " + ex.Message;
+            }
+
+            return response;
+        }
     }
 }

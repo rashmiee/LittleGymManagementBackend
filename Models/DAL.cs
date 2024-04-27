@@ -444,7 +444,16 @@ namespace LittleGymManagementBackend.Models
 
             try
             {
-                string query = "SELECT * FROM ClassSession";
+                string query = @"
+            SELECT 
+                cs.*, 
+                l.lesson_id AS lesson_id, 
+                l.Name AS LessonName, 
+                l.Description AS LessonDescription 
+            FROM 
+                ClassSession cs 
+            LEFT JOIN 
+                Lesson l ON cs.lesson_id = l.lesson_id";
 
                 using (SqlCommand cmd = new SqlCommand(query, connection))
                 {
@@ -455,7 +464,6 @@ namespace LittleGymManagementBackend.Models
                     {
                         ClassSession classSession = new ClassSession
                         {
-                            // Assuming ClassSession properties match the database columns
                             SessionClassId = (int)reader["SessionClassId"],
                             Name = reader["Name"].ToString(),
                             Category = reader["Category"].ToString(),
@@ -464,7 +472,14 @@ namespace LittleGymManagementBackend.Models
                             Price = (decimal)reader["Price"],
                             StartTime = TimeSpan.Parse(Convert.ToString(reader["StartTime"])),
                             StartDate = (DateTime)reader["StartDate"],
-                            EndDate = (DateTime)reader["EndDate"]
+                            EndDate = (DateTime)reader["EndDate"],
+                            lesson_id = (int)reader["lesson_id"],
+                            Lesson = new Lesson
+                            {
+                                lesson_id = (int)reader["lesson_id"],
+                                Name = reader["LessonName"].ToString(),
+                                Description = reader["LessonDescription"].ToString()
+                            }
                         };
                         classSessions.Add(classSession);
                     }
@@ -486,6 +501,117 @@ namespace LittleGymManagementBackend.Models
             }
 
             return classSessions;
+        }
+
+        public Response AddLesson(Lesson lesson, SqlConnection connection)
+        {
+            Response response = new Response();
+            try
+            {
+                string query = @"INSERT INTO Lesson (Name, Description) 
+                     VALUES (@Name, @Description)";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@Name", lesson.Name);
+                    cmd.Parameters.AddWithValue("@Description", lesson.Description);
+
+                    connection.Open();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    connection.Close();
+
+                    if (rowsAffected > 0)
+                    {
+                        response.StatusCode = 200;
+                        response.StatusMessage = "Lesson Created.";
+                    }
+                    else
+                    {
+                        response.StatusCode = 100;
+                        response.StatusMessage = "Lesson Creation failed.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500;
+                response.StatusMessage = "An error occurred: " + ex.Message;
+            }
+
+            return response;
+        }
+
+        public List<Lesson> GetAllLessons(SqlConnection connection)
+        {
+            List<Lesson> lessons = new List<Lesson>();
+            try
+            {
+                string query = "SELECT * FROM Lesson";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        Lesson lesson = new Lesson
+                        {
+                            lesson_id = Convert.ToInt32(reader["lesson_id"]),
+                            Name = reader["Name"].ToString(),
+                            Description = reader["Description"].ToString()
+                        };
+                        lessons.Add(lesson);
+                    }
+
+                    reader.Close();
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions
+                throw ex;
+            }
+
+            return lessons;
+        }
+
+        public Response AddLessonToClassSession(int lesson_id, int classSessionId, SqlConnection connection)
+        {
+            Response response = new Response();
+            try
+            {
+                string query = @"UPDATE ClassSession SET lesson_id = @lesson_id WHERE SessionClassId = @ClassSessionId";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@lesson_id", lesson_id);
+                    cmd.Parameters.AddWithValue("@ClassSessionId", classSessionId);
+
+                    connection.Open();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    connection.Close();
+
+                    if (rowsAffected > 0)
+                    {
+                        response.StatusCode = 200;
+                        response.StatusMessage = "Lesson added to class session.";
+                    }
+                    else
+                    {
+                        response.StatusCode = 100;
+                        response.StatusMessage = "Failed to add lesson to class session.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500;
+                response.StatusMessage = "An error occurred: " + ex.Message;
+            }
+
+            return response;
         }
 
     }
