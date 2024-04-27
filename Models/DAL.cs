@@ -394,5 +394,99 @@ namespace LittleGymManagementBackend.Models
             return children;
         }
 
+        public Response AddClassSession(ClassSession classSession, SqlConnection connection)
+        {
+            Response response = new Response();
+            try
+            {
+                string query = @"INSERT INTO ClassSession (Name, Category, Description, Image, Price, StartTime, StartDate, EndDate) 
+                             VALUES (@Name, @Category, @Description, @Image, @Price, @StartTime, @StartDate, @EndDate)";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@Name", classSession.Name);
+                    cmd.Parameters.AddWithValue("@Category", classSession.Category);
+                    cmd.Parameters.AddWithValue("@Description", classSession.Description);
+                    cmd.Parameters.AddWithValue("@Image", classSession.Image);
+                    cmd.Parameters.AddWithValue("@Price", classSession.Price);
+                    cmd.Parameters.AddWithValue("@StartTime", classSession.StartTime);
+                    cmd.Parameters.AddWithValue("@StartDate", classSession.StartDate);
+                    cmd.Parameters.AddWithValue("@EndDate", classSession.EndDate);
+
+                    connection.Open();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    connection.Close();
+
+                    if (rowsAffected > 0)
+                    {
+                        response.StatusCode = 200;
+                        response.StatusMessage = "Class Created.";
+                    }
+                    else
+                    {
+                        response.StatusCode = 100;
+                        response.StatusMessage = "Class Creation failed.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500;
+                response.StatusMessage = "An error occurred: " + ex.Message;
+            }
+
+            return response;
+        }
+
+        public List<ClassSession> GetAllClassSessions(SqlConnection connection)
+        {
+            List<ClassSession> classSessions = new List<ClassSession>();
+
+            try
+            {
+                string query = "SELECT * FROM ClassSession";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        ClassSession classSession = new ClassSession
+                        {
+                            // Assuming ClassSession properties match the database columns
+                            SessionClassId = (int)reader["SessionClassId"],
+                            Name = reader["Name"].ToString(),
+                            Category = reader["Category"].ToString(),
+                            Description = reader["Description"].ToString(),
+                            Image = reader["Image"].ToString(),
+                            Price = (decimal)reader["Price"],
+                            StartTime = TimeSpan.Parse(Convert.ToString(reader["StartTime"])),
+                            StartDate = (DateTime)reader["StartDate"],
+                            EndDate = (DateTime)reader["EndDate"]
+                        };
+                        classSessions.Add(classSession);
+                    }
+
+                    reader.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the error or handle it appropriately
+                throw ex;
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
+                {
+                    connection.Close();
+                }
+            }
+
+            return classSessions;
+        }
+
     }
 }

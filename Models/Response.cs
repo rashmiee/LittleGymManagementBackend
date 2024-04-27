@@ -12,5 +12,6 @@
         public Users user { get; set; }
         public Article article { get; set; }
         public News news { get; set; }
+        public ClassSession ClassSession { get; set; }
     }
 }

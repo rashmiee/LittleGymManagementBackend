@@ -38,6 +38,9 @@ namespace LittleGymManagementBackend
                     .AllowCredentials());
                     });
             services.AddControllers();
+            services.AddControllersWithViews();
+            services.AddRazorPages();
+            services.AddMvc();
         }
         // This method gets called by the runtime.Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -58,7 +61,7 @@ namespace LittleGymManagementBackend
             app.UseCors("AllowReactApp");
             app.UseRouting();
             app.UseAuthorization();
-
+            app.UseStaticFiles();
             // Enable CORS for requests from http://localhost:3000
             app.UseCors("AllowLocalhost3000");
             //app.UseCors(options => options.WithOrigins("*").AllowAnyMethod().AllowAnyHeader() );
@@ -66,6 +69,7 @@ namespace LittleGymManagementBackend
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapRazorPages();
             });
         }
     }
