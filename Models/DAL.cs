@@ -614,5 +614,156 @@ namespace LittleGymManagementBackend.Models
             return response;
         }
 
+        public Response AddSkill(Skill skill, SqlConnection connection)
+        {
+            Response response = new Response();
+            try
+            {
+                string query = @"INSERT INTO Skills (Name, Description) 
+                         VALUES (@Name, @Description)";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@Name", skill.Name);
+                    cmd.Parameters.AddWithValue("@Description", skill.Description);
+
+                    connection.Open();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    connection.Close();
+
+                    if (rowsAffected > 0)
+                    {
+                        response.StatusCode = 200;
+                        response.StatusMessage = "Skill Created.";
+                    }
+                    else
+                    {
+                        response.StatusCode = 100;
+                        response.StatusMessage = "Skill Creation failed.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500;
+                response.StatusMessage = "An error occurred: " + ex.Message;
+            }
+
+            return response;
+        }
+
+        public Response AddSkillProgress(SkillProgress skillProgress, SqlConnection connection)
+        {
+            Response response = new Response();
+            try
+            {
+                string query = @"INSERT INTO skill_progress (user_ID, skill_ID, status, feedback) 
+                         VALUES (@User_ID, @Skill_ID, @Status, @Feedback)";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@User_ID", skillProgress.User_ID);
+                    cmd.Parameters.AddWithValue("@Skill_ID", skillProgress.Skill_ID);
+                    cmd.Parameters.AddWithValue("@Status", skillProgress.Status);
+                    cmd.Parameters.AddWithValue("@Feedback", skillProgress.Feedback);
+
+                    connection.Open();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    connection.Close();
+
+                    if (rowsAffected > 0)
+                    {
+                        response.StatusCode = 200;
+                        response.StatusMessage = "Skill Progress Added.";
+                    }
+                    else
+                    {
+                        response.StatusCode = 100;
+                        response.StatusMessage = "Skill Progress Addition failed.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500;
+                response.StatusMessage = "An error occurred: " + ex.Message;
+            }
+
+            return response;
+        }
+
+        public List<Skill> GetAllSkills(SqlConnection connection)
+        {
+            List<Skill> skills = new List<Skill>();
+            try
+            {
+                string query = @"SELECT Skill_ID, Name, Description FROM Skills";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Skill skill = new Skill
+                            {
+                                Skill_ID = Convert.ToInt32(reader["Skill_ID"]),
+                                Name = reader["Name"].ToString(),
+                                Description = reader["Description"].ToString()
+                            };
+                            skills.Add(skill);
+                        }
+                    }
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return skills;
+        }
+
+        public List<Users> GetChildren(SqlConnection connection)
+        {
+            List<Users> children = new List<Users>();
+            try
+            {
+                string query = @"SELECT ID, FirstName, LastName, Email, Type, Status, CreatedOn, IsApproved, PhoneNo, UserEmail 
+                         FROM Users
+                         WHERE Type = 'Child'";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Users child = new Users
+                            {
+                                ID = Convert.ToInt32(reader["ID"]),
+                                FirstName = reader["FirstName"].ToString(),
+                                LastName = reader["LastName"].ToString(),
+                                Email = reader["Email"].ToString(),
+                                Type = reader["Type"].ToString(),
+                                PhoneNo = reader["PhoneNo"].ToString(),
+                                UserEmail = reader["UserEmail"].ToString()
+                            };
+                            children.Add(child);
+                        }
+                    }
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return children;
+        }
+
+
     }
 }

@@ -141,5 +141,27 @@ namespace LittleGymManagementBackend.Controllers
 
             return Ok(children);
         }
+
+        [HttpGet]
+        [Route("getChildren")]
+        public ActionResult<List<Users>> GetChildren()      
+        {
+            List<Users> children = new List<Users>();
+            try
+            {
+                string connectionString = _configuration.GetConnectionString("LittleGymManagementDb");
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    DAL classDAL = new DAL();
+                    children = classDAL.GetChildren(connection);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle exception
+            }
+            return children;
+        }
+
     }
 }
