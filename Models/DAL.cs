@@ -1,5 +1,6 @@
 ﻿using System.Data.SqlClient;
 using System.Data;
+using Microsoft.Extensions.Configuration;
 
 namespace LittleGymManagementBackend.Models
 {
@@ -764,6 +765,48 @@ namespace LittleGymManagementBackend.Models
             return children;
         }
 
+        public Response ForgotPassword(string email, string newPassword, string connectionString)
+        {
+            Response response = new Response();
+            SqlConnection connection = new SqlConnection(connectionString);
 
+            try
+            {
+                string query = @"UPDATE Users SET Password = @NewPassword WHERE Email = @Email";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@NewPassword", newPassword);
+                    cmd.Parameters.AddWithValue("@Email", email);
+
+                    connection.Open();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    connection.Close();
+
+                    if (rowsAffected > 0)
+                    {
+                        response.StatusCode = 200;
+                        response.StatusMessage = "Password reset successfully.";
+                    }
+                    else
+                    {
+                        response.StatusCode = 100;
+                        response.StatusMessage = "Failed to reset password. Email not found.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500;
+                response.StatusMessage = "An error occurred: " + ex.Message;
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
+                    connection.Close();
+            }
+
+            return response;
+        }
     }
 }

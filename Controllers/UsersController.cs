@@ -163,5 +163,24 @@ namespace LittleGymManagementBackend.Controllers
             return children;
         }
 
+        [HttpPost]
+        [Route("forgotPassword")]
+        public ActionResult<Response> ForgotPassword(string email, string newPassword)
+        {
+            Response response = new Response();
+            try
+            {
+                string connectionString = _configuration.GetConnectionString("LittleGymManagementDb");
+                DAL dal = new DAL();
+                response = dal.ForgotPassword(email, newPassword, connectionString);
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500;
+                response.StatusMessage = "An error occurred: " + ex.Message;
+            }
+
+            return response;
+        }
     }
 }
