@@ -308,7 +308,7 @@ namespace LittleGymManagementBackend.Models
                 connection.Open();
 
                 // Define the SQL query
-                string query = "SELECT FirstName, LastName, Email, PhoneNo FROM Users WHERE Type = 'Teachers'";
+                string query = "SELECT ID, FirstName, LastName, Email, PhoneNo FROM Users WHERE Type = 'Teachers'";
 
                 // Create a SqlCommand object to execute the query
                 SqlCommand command = new SqlCommand(query, connection);
@@ -324,6 +324,7 @@ namespace LittleGymManagementBackend.Models
                     teacher.LastName = reader["LastName"].ToString();
                     teacher.Email = reader["Email"].ToString();
                     teacher.PhoneNo = reader["PhoneNo"].ToString();
+                    teacher.ID = Convert.ToInt32(reader["ID"]);
                     teachers.Add(teacher);
                 }
 
@@ -799,6 +800,86 @@ namespace LittleGymManagementBackend.Models
             {
                 response.StatusCode = 500;
                 response.StatusMessage = "An error occurred: " + ex.Message;
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
+                    connection.Close();
+            }
+
+            return response;
+        }
+
+        public Response DeleteTeacher(int teacherId, SqlConnection connection)
+        {
+            Response response = new Response();
+
+            try
+            {
+                SqlCommand cmd = new SqlCommand("DELETE FROM Users WHERE ID = @TeacherId", connection);
+                cmd.Parameters.AddWithValue("@TeacherId", teacherId);
+
+                connection.Open();
+                int rowsAffected = cmd.ExecuteNonQuery();
+                connection.Close();
+
+                if (rowsAffected > 0)
+                {
+                    response.StatusCode = 200;
+                    response.StatusMessage = "Teacher deleted successfully.";
+                }
+                else
+                {
+                    response.StatusCode = 404; // Assuming 404 for not found
+                    response.StatusMessage = "Teacher not found.";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500; // Internal server error
+                response.StatusMessage = "Error deleting teacher: " + ex.Message;
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
+                    connection.Close();
+            }
+
+            return response;
+        }
+
+        public Response EditUser(Users user, SqlConnection connection)
+        {
+            Response response = new Response();
+
+            try
+            {
+                SqlCommand cmd = new SqlCommand("UPDATE Users SET FirstName = @FirstName, LastName = @LastName, Email = @Email, Password = @Password WHERE ID = @UserID", connection);
+                cmd.Parameters.AddWithValue("@FirstName", user.FirstName);
+                cmd.Parameters.AddWithValue("@LastName", user.LastName);
+                cmd.Parameters.AddWithValue("@Email", user.Email);
+                cmd.Parameters.AddWithValue("@Password", user.Password);
+                cmd.Parameters.AddWithValue("@UserID", user.ID);
+
+                connection.Open();
+                int rowsAffected = cmd.ExecuteNonQuery();
+                connection.Close();
+
+                if (rowsAffected > 0)
+                {
+                    response.StatusCode = 200;
+                    response.StatusMessage = "User information updated successfully.";
+                }
+                else
+                {
+                    response.StatusCode = 404; // Assuming 404 for not found
+                    response.StatusMessage = "User not found.";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500; // Internal server error
+                response.StatusMessage = "Error updating user information: " + ex.Message;
             }
             finally
             {

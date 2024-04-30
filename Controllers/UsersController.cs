@@ -182,5 +182,65 @@ namespace LittleGymManagementBackend.Controllers
 
             return response;
         }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteTeacher(int id)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("LittleGymManagementDb")))
+                {
+                    DAL teacherDAL = new DAL();
+                    Response response = teacherDAL.DeleteTeacher(id, connection);
+
+                    if (response.StatusCode == 200)
+                        return Ok(response);
+                    else if (response.StatusCode == 404)
+                        return NotFound(response);
+                    else
+                        return StatusCode(500, response);
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response { StatusCode = 500, StatusMessage = "Internal server error: " + ex.Message });
+            }
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult EditUser(int id, Users user)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("LittleGymManagementDb")))
+                {
+                    DAL userDAL = new DAL();
+                    user.ID = id; // Set the ID from route parameter
+
+                    // Only update allowed fields
+                    Users updatedUser = new Users
+                    {
+                        ID = user.ID,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Email = user.Email,
+                        Password = user.Password
+                    };
+
+                    Response response = userDAL.EditUser(updatedUser, connection);
+
+                    if (response.StatusCode == 200)
+                        return Ok(response);
+                    else if (response.StatusCode == 404)
+                        return NotFound(response);
+                    else
+                        return StatusCode(500, response);
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response { StatusCode = 500, StatusMessage = "Internal server error: " + ex.Message });
+            }
+        }
     }
 }
