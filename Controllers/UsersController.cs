@@ -217,14 +217,14 @@ namespace LittleGymManagementBackend.Controllers
                     DAL userDAL = new DAL();
                     user.ID = id; // Set the ID from route parameter
 
-                    // Only update allowed fields
+                    // Only update allowed fields, excluding password
                     Users updatedUser = new Users
                     {
                         ID = user.ID,
                         FirstName = user.FirstName,
                         LastName = user.LastName,
                         Email = user.Email,
-                        Password = user.Password
+                        PhoneNo = user.PhoneNo
                     };
 
                     Response response = userDAL.EditUser(updatedUser, connection);
@@ -242,5 +242,6 @@ namespace LittleGymManagementBackend.Controllers
                 return StatusCode(500, new Response { StatusCode = 500, StatusMessage = "Internal server error: " + ex.Message });
             }
         }
+
     }
 }

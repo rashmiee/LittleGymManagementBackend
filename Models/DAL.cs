@@ -854,11 +854,11 @@ namespace LittleGymManagementBackend.Models
 
             try
             {
-                SqlCommand cmd = new SqlCommand("UPDATE Users SET FirstName = @FirstName, LastName = @LastName, Email = @Email, Password = @Password WHERE ID = @UserID", connection);
+                SqlCommand cmd = new SqlCommand("UPDATE Users SET FirstName = @FirstName, LastName = @LastName, Email = @Email, PhoneNo = @PhoneNo WHERE ID = @UserID", connection);
                 cmd.Parameters.AddWithValue("@FirstName", user.FirstName);
                 cmd.Parameters.AddWithValue("@LastName", user.LastName);
                 cmd.Parameters.AddWithValue("@Email", user.Email);
-                cmd.Parameters.AddWithValue("@Password", user.Password);
+                cmd.Parameters.AddWithValue("@PhoneNo", user.PhoneNo);
                 cmd.Parameters.AddWithValue("@UserID", user.ID);
 
                 connection.Open();
