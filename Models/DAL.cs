@@ -475,10 +475,10 @@ namespace LittleGymManagementBackend.Models
                             StartTime = TimeSpan.Parse(Convert.ToString(reader["StartTime"])),
                             StartDate = (DateTime)reader["StartDate"],
                             EndDate = (DateTime)reader["EndDate"],
-                            lesson_id = (int)reader["lesson_id"],
+                            lesson_id = DBNull.Value.Equals(reader["lesson_id"]) ? 0 : (int)reader["lesson_id"], // Handle DBNull
                             Lesson = new Lesson
                             {
-                                lesson_id = (int)reader["lesson_id"],
+                                lesson_id = DBNull.Value.Equals(reader["lesson_id"]) ? 0 : (int)reader["lesson_id"], // Handle DBNull
                                 Name = reader["LessonName"].ToString(),
                                 Description = reader["LessonDescription"].ToString()
                             }
@@ -888,6 +888,48 @@ namespace LittleGymManagementBackend.Models
             }
 
             return response;
+        }
+
+        public ClassSession GetClassSessionById(int id, SqlConnection connection)
+        {
+            ClassSession classSession = new ClassSession();
+            try
+            {
+                string query = @"SELECT * FROM ClassSession WHERE SessionClassId = @Id";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@Id", id);
+
+                    connection.Open();
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            classSession.SessionClassId = reader.GetInt32(reader.GetOrdinal("SessionClassId"));
+                            classSession.Name = reader.GetString(reader.GetOrdinal("Name"));
+                            classSession.Category = reader.GetString(reader.GetOrdinal("Category"));
+                            classSession.Description = reader.GetString(reader.GetOrdinal("Description"));
+                            classSession.Image = reader.GetString(reader.GetOrdinal("Image"));
+                            classSession.Price = reader.GetDecimal(reader.GetOrdinal("Price"));
+                            classSession.StartTime = TimeSpan.Parse(Convert.ToString(reader["StartTime"]));
+                            classSession.StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate"));
+                            classSession.EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate"));
+                        }
+                    }
+                    reader.Close();
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+                // Handle exceptions
+            }
+
+            return classSession;
         }
     }
 }

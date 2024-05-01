@@ -12,7 +12,7 @@
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         // Foreign key
-        public int lesson_id { get; set; }
-        public Lesson Lesson { get; set; }
+        public int? lesson_id { get; set; }
+        public Lesson? Lesson { get; set; }
     }
 }

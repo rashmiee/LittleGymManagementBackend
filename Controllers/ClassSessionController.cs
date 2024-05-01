@@ -94,5 +94,27 @@ namespace LittleGymManagementBackend.Controllers
 
             return response;
         }
+
+        [HttpGet]
+        [Route("getClassSessionById/{id}")]
+        public ActionResult<ClassSession> GetClassSessionById(int id)
+        {
+            ClassSession classSession = new ClassSession();
+            try
+            {
+                string connectionString = _configuration.GetConnectionString("LittleGymManagementDb");
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    DAL classSessionDAL = new DAL();
+                    classSession = classSessionDAL.GetClassSessionById(id, connection);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions
+            }
+
+            return classSession;
+        }
     }
 }
