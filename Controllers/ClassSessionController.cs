@@ -116,5 +116,69 @@ namespace LittleGymManagementBackend.Controllers
 
             return classSession;
         }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteSession(int id)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("LittleGymManagementDb")))
+                {
+                    DAL sessionDAL = new DAL();
+                    Response response = sessionDAL.DeleteClassSession(id, connection);
+
+                    if (response.StatusCode == 200)
+                        return Ok(response);
+                    else if (response.StatusCode == 404)
+                        return NotFound(response);
+                    else
+                        return StatusCode(500, response);
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response { StatusCode = 500, StatusMessage = "Internal server error: " + ex.Message });
+            }
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult EditSession(int id, ClassSession session)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("LittleGymManagementDb")))
+                {
+                    DAL sessionDAL = new DAL();
+                    session.SessionClassId = id; // Set the ID from route parameter
+
+                    // Only update allowed fields
+                    ClassSession updatedSession = new ClassSession
+                    {
+                        SessionClassId = session.SessionClassId,
+                        Name = session.Name,
+                        Category = session.Category,
+                        Description = session.Description,
+                        Image = session.Image,
+                        Price = session.Price,
+                        StartTime = session.StartTime,
+                        StartDate = session.StartDate,
+                        EndDate = session.EndDate
+                    };
+
+                    Response response = sessionDAL.EditClassSession(updatedSession, connection);
+
+                    if (response.StatusCode == 200)
+                        return Ok(response);
+                    else if (response.StatusCode == 404)
+                        return NotFound(response);
+                    else
+                        return StatusCode(500, response);
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response { StatusCode = 500, StatusMessage = "Internal server error: " + ex.Message });
+            }
+        }
     }
 }

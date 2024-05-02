@@ -931,5 +931,89 @@ namespace LittleGymManagementBackend.Models
 
             return classSession;
         }
+
+        public Response EditClassSession(ClassSession session, SqlConnection connection)
+        {
+            Response response = new Response();
+
+            try
+            {
+                SqlCommand cmd = new SqlCommand("UPDATE ClassSession SET Name = @Name, Category = @Category, Description = @Description, Image = @Image, Price = @Price, StartTime = @StartTime, StartDate = @StartDate, EndDate = @EndDate WHERE SessionClassId = @SessionClassId", connection);
+                cmd.Parameters.AddWithValue("@Name", session.Name);
+                cmd.Parameters.AddWithValue("@Category", session.Category);
+                cmd.Parameters.AddWithValue("@Description", session.Description);
+                cmd.Parameters.AddWithValue("@Image", session.Image ?? (object)DBNull.Value); // handle nullable Image
+                cmd.Parameters.AddWithValue("@Price", session.Price);
+                cmd.Parameters.AddWithValue("@StartTime", session.StartTime);
+                cmd.Parameters.AddWithValue("@StartDate", session.StartDate);
+                cmd.Parameters.AddWithValue("@EndDate", session.EndDate);
+                cmd.Parameters.AddWithValue("@SessionClassId", session.SessionClassId);
+
+                connection.Open();
+                int rowsAffected = cmd.ExecuteNonQuery();
+                connection.Close();
+
+                if (rowsAffected > 0)
+                {
+                    response.StatusCode = 200;
+                    response.StatusMessage = "Session information updated successfully.";
+                }
+                else
+                {
+                    response.StatusCode = 404; // Assuming 404 for not found
+                    response.StatusMessage = "Session not found.";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500; // Internal server error
+                response.StatusMessage = "Error updating session information: " + ex.Message;
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
+                    connection.Close();
+            }
+
+            return response;
+        }
+
+        public Response DeleteClassSession(int sessionId, SqlConnection connection)
+        {
+            Response response = new Response();
+
+            try
+            {
+                SqlCommand cmd = new SqlCommand("DELETE FROM ClassSession WHERE SessionClassId = @SessionId", connection);
+                cmd.Parameters.AddWithValue("@SessionId", sessionId);
+
+                connection.Open();
+                int rowsAffected = cmd.ExecuteNonQuery();
+                connection.Close();
+
+                if (rowsAffected > 0)
+                {
+                    response.StatusCode = 200;
+                    response.StatusMessage = "Session deleted successfully.";
+                }
+                else
+                {
+                    response.StatusCode = 404; // Assuming 404 for not found
+                    response.StatusMessage = "Session not found.";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500; // Internal server error
+                response.StatusMessage = "Error deleting session: " + ex.Message;
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
+                    connection.Close();
+            }
+
+            return response;
+        }
     }
 }
