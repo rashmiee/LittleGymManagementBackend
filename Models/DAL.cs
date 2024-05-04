@@ -356,7 +356,7 @@ namespace LittleGymManagementBackend.Models
                 connection.Open();
 
                 // Define the SQL query with parameters
-                string query = "SELECT FirstName, LastName, Email, PhoneNo FROM Users WHERE Type = 'Child' AND UserEmail = @UserEmail";
+                string query = "SELECT ID, FirstName, LastName, Email, PhoneNo FROM Users WHERE Type = 'Child' AND UserEmail = @UserEmail";
 
                 // Create a SqlCommand object to execute the query
                 SqlCommand command = new SqlCommand(query, connection);
@@ -371,6 +371,7 @@ namespace LittleGymManagementBackend.Models
                 while (reader.Read())
                 {
                     Users child = new Users();
+                    child.ID = Convert.ToInt32(reader["ID"]);
                     child.FirstName = reader["FirstName"].ToString();
                     child.LastName = reader["LastName"].ToString();
                     child.Email = reader["Email"].ToString();
@@ -1015,5 +1016,162 @@ namespace LittleGymManagementBackend.Models
 
             return response;
         }
+
+        public Response DeleteLesson(int lessonId, SqlConnection connection)
+        {
+            Response response = new Response();
+
+            try
+            {
+                SqlCommand cmd = new SqlCommand("DELETE FROM Lesson WHERE lesson_id = @LessonId", connection);
+                cmd.Parameters.AddWithValue("@LessonId", lessonId);
+
+                connection.Open();
+                int rowsAffected = cmd.ExecuteNonQuery();
+                connection.Close();
+
+                if (rowsAffected > 0)
+                {
+                    response.StatusCode = 200;
+                    response.StatusMessage = "Lesson deleted successfully.";
+                }
+                else
+                {
+                    response.StatusCode = 404; // Assuming 404 for not found
+                    response.StatusMessage = "Lesson not found.";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500; // Internal server error
+                response.StatusMessage = "Error deleting lesson: " + ex.Message;
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
+                    connection.Close();
+            }
+
+            return response;
+        }
+
+        public Response EditLesson(Lesson lesson, SqlConnection connection)
+        {
+            Response response = new Response();
+
+            try
+            {
+                SqlCommand cmd = new SqlCommand("UPDATE Lesson SET Name = @Name, Description = @Description WHERE lesson_id = @LessonId", connection);
+                cmd.Parameters.AddWithValue("@Name", lesson.Name);
+                cmd.Parameters.AddWithValue("@Description", lesson.Description);
+                cmd.Parameters.AddWithValue("@LessonId", lesson.lesson_id);
+
+                connection.Open();
+                int rowsAffected = cmd.ExecuteNonQuery();
+                connection.Close();
+
+                if (rowsAffected > 0)
+                {
+                    response.StatusCode = 200;
+                    response.StatusMessage = "Lesson information updated successfully.";
+                }
+                else
+                {
+                    response.StatusCode = 404; // Assuming 404 for not found
+                    response.StatusMessage = "Lesson not found.";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500; // Internal server error
+                response.StatusMessage = "Error updating lesson information: " + ex.Message;
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
+                    connection.Close();
+            }
+
+            return response;
+        }
+
+        public Response DeleteSkill(int skillId, SqlConnection connection)
+        {
+            Response response = new Response();
+
+            try
+            {
+                SqlCommand cmd = new SqlCommand("DELETE FROM Skills WHERE skill_id = @SkillId", connection);
+                cmd.Parameters.AddWithValue("@SkillId", skillId);
+
+                connection.Open();
+                int rowsAffected = cmd.ExecuteNonQuery();
+                connection.Close();
+
+                if (rowsAffected > 0)
+                {
+                    response.StatusCode = 200;
+                    response.StatusMessage = "Skill deleted successfully.";
+                }
+                else
+                {
+                    response.StatusCode = 404; // Assuming 404 for not found
+                    response.StatusMessage = "Skill not found.";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500; // Internal server error
+                response.StatusMessage = "Error deleting skill: " + ex.Message;
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
+                    connection.Close();
+            }
+
+            return response;
+        }
+
+        public Response EditSkill(Skill skill, SqlConnection connection)
+        {
+            Response response = new Response();
+
+            try
+            {
+                SqlCommand cmd = new SqlCommand("UPDATE Skills SET Name = @Name, Description = @Description WHERE skill_id = @SkillId", connection);
+                cmd.Parameters.AddWithValue("@Name", skill.Name);
+                cmd.Parameters.AddWithValue("@Description", skill.Description);
+                cmd.Parameters.AddWithValue("@SkillId", skill.Skill_ID);
+
+                connection.Open();
+                int rowsAffected = cmd.ExecuteNonQuery();
+                connection.Close();
+
+                if (rowsAffected > 0)
+                {
+                    response.StatusCode = 200;
+                    response.StatusMessage = "Skill information updated successfully.";
+                }
+                else
+                {
+                    response.StatusCode = 404; // Assuming 404 for not found
+                    response.StatusMessage = "Skill not found.";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500; // Internal server error
+                response.StatusMessage = "Error updating skill information: " + ex.Message;
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
+                    connection.Close();
+            }
+
+            return response;
+        }
+
     }
 }

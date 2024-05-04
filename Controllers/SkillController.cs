@@ -58,5 +58,56 @@ namespace LittleGymManagementBackend.Controllers
             return skills;
         }
 
+        [HttpDelete("/api/Skill/{id}")]
+        public IActionResult DeleteSkill(int id)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("LittleGymManagementDb")))
+                {
+                    DAL skillDAL = new DAL();
+                    Response response = skillDAL.DeleteSkill(id, connection);
+
+                    if (response.StatusCode == 200)
+                        return Ok(response);
+                    else if (response.StatusCode == 404)
+                        return NotFound(response);
+                    else
+                        return StatusCode(500, response);
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response { StatusCode = 500, StatusMessage = "Internal server error: " + ex.Message });
+            }
+        }
+
+        [HttpPut("/api/Skill/{id}")]
+        public IActionResult EditSkill(int id, Skill skill)
+        {
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("LittleGymManagementDb")))
+                {
+                    DAL skillDAL = new DAL();
+                    skill.Skill_ID = id; // Set the ID from route parameter
+
+                    Response response = skillDAL.EditSkill(skill, connection);
+
+                    if (response.StatusCode == 200)
+                        return Ok(response);
+                    else if (response.StatusCode == 404)
+                        return NotFound(response);
+                    else
+                        return StatusCode(500, response);
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response { StatusCode = 500, StatusMessage = "Internal server error: " + ex.Message });
+            }
+        }
+
+
     }
 }
