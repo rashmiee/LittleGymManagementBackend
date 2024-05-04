@@ -655,45 +655,45 @@ namespace LittleGymManagementBackend.Models
             return response;
         }
 
-        public Response AddSkillProgress(SkillProgress skillProgress, SqlConnection connection)
-        {
-            Response response = new Response();
-            try
-            {
-                string query = @"INSERT INTO skill_progress (user_ID, skill_ID, status, feedback) 
-                         VALUES (@User_ID, @Skill_ID, @Status, @Feedback)";
+        //public Response AddSkillProgress(SkillProgress skillProgress, SqlConnection connection)
+        //{
+        //    Response response = new Response();
+        //    try
+        //    {
+        //        string query = @"INSERT INTO skill_progress (user_ID, skill_ID, status, feedback) 
+        //                 VALUES (@User_ID, @Skill_ID, @Status, @Feedback)";
 
-                using (SqlCommand cmd = new SqlCommand(query, connection))
-                {
-                    cmd.Parameters.AddWithValue("@User_ID", skillProgress.User_ID);
-                    cmd.Parameters.AddWithValue("@Skill_ID", skillProgress.Skill_ID);
-                    cmd.Parameters.AddWithValue("@Status", skillProgress.Status);
-                    cmd.Parameters.AddWithValue("@Feedback", skillProgress.Feedback);
+        //        using (SqlCommand cmd = new SqlCommand(query, connection))
+        //        {
+        //            cmd.Parameters.AddWithValue("@User_ID", skillProgress.User_ID);
+        //            cmd.Parameters.AddWithValue("@Skill_ID", skillProgress.Skill_ID);
+        //            cmd.Parameters.AddWithValue("@Status", skillProgress.Status);
+        //            cmd.Parameters.AddWithValue("@Feedback", skillProgress.Feedback);
 
-                    connection.Open();
-                    int rowsAffected = cmd.ExecuteNonQuery();
-                    connection.Close();
+        //            connection.Open();
+        //            int rowsAffected = cmd.ExecuteNonQuery();
+        //            connection.Close();
 
-                    if (rowsAffected > 0)
-                    {
-                        response.StatusCode = 200;
-                        response.StatusMessage = "Skill Progress Added.";
-                    }
-                    else
-                    {
-                        response.StatusCode = 100;
-                        response.StatusMessage = "Skill Progress Addition failed.";
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                response.StatusCode = 500;
-                response.StatusMessage = "An error occurred: " + ex.Message;
-            }
+        //            if (rowsAffected > 0)
+        //            {
+        //                response.StatusCode = 200;
+        //                response.StatusMessage = "Skill Progress Added.";
+        //            }
+        //            else
+        //            {
+        //                response.StatusCode = 100;
+        //                response.StatusMessage = "Skill Progress Addition failed.";
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        response.StatusCode = 500;
+        //        response.StatusMessage = "An error occurred: " + ex.Message;
+        //    }
 
-            return response;
-        }
+        //    return response;
+        //}
 
         public List<Skill> GetAllSkills(SqlConnection connection)
         {
@@ -1168,6 +1168,250 @@ namespace LittleGymManagementBackend.Models
             {
                 if (connection.State == ConnectionState.Open)
                     connection.Close();
+            }
+
+            return response;
+        }
+
+        public List<Skill> GetFinishedSkillsForUser(int userId, SqlConnection connection)
+        {
+            List<Skill> finishedSkills = new List<Skill>();
+
+            try
+            {
+                SqlCommand cmd = new SqlCommand("SELECT s.* FROM Skills s INNER JOIN skill_progress sp ON s.Skill_ID = sp.skill_id WHERE sp.user_id = @UserId AND sp.status = 'Completed'", connection);
+                cmd.Parameters.AddWithValue("@UserId", userId);
+
+                connection.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    Skill skill = new Skill
+                    {
+                        Skill_ID = Convert.ToInt32(reader["Skill_ID"]),
+                        Name = reader["Name"].ToString(),
+                        Description = reader["Description"].ToString()
+                    };
+                    finishedSkills.Add(skill);
+                }
+
+                reader.Close();
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
+                    connection.Close();
+            }
+
+            return finishedSkills;
+        }
+
+        //public Response AddSkillProgress(SkillProgress skillProgress, SqlConnection connection)
+        //{
+        //    Response response = new Response();
+
+        //    try
+        //    {
+        //        string query = @"INSERT INTO SkillProgress (user_id, skill_id, status, feedback) 
+        //         VALUES (@UserId, @SkillId, @Status, @Feedback)";
+
+        //        using (SqlCommand cmd = new SqlCommand(query, connection))
+        //        {
+        //            cmd.Parameters.AddWithValue("@UserId", skillProgress.User_ID);
+        //            cmd.Parameters.AddWithValue("@SkillId", skillProgress.Skill_ID);
+        //            cmd.Parameters.AddWithValue("@Status", skillProgress.Status);
+        //            cmd.Parameters.AddWithValue("@Feedback", skillProgress.Feedback);
+
+        //            connection.Open();
+        //            int rowsAffected = cmd.ExecuteNonQuery();
+        //            connection.Close();
+
+        //            if (rowsAffected > 0)
+        //            {
+        //                response.StatusCode = 200;
+        //                response.StatusMessage = "Skill Progress Added.";
+        //            }
+        //            else
+        //            {
+        //                response.StatusCode = 100;
+        //                response.StatusMessage = "Skill Progress Addition failed.";
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        response.StatusCode = 500;
+        //        response.StatusMessage = "An error occurred: " + ex.Message;
+        //    }
+
+        //    return response;
+        //}
+
+        public List<SkillProgress> GetAllSkillProgress(SqlConnection connection)
+        {
+            List<SkillProgress> allSkillProgress = new List<SkillProgress>();
+
+            try
+            {
+                SqlCommand cmd = new SqlCommand("SELECT * FROM skill_progress", connection);
+
+                connection.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    SkillProgress progress = new SkillProgress
+                    {
+                        Progress_ID = Convert.ToInt32(reader["progress_id"]),
+                        User_ID = Convert.ToInt32(reader["user_id"]),
+                        Skill_ID = Convert.ToInt32(reader["skill_id"]),
+                        Status = reader["status"].ToString(),
+                        Feedback = reader["feedback"].ToString()
+                    };
+                    allSkillProgress.Add(progress);
+                }
+
+                reader.Close();
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
+                    connection.Close();
+            }
+
+            return allSkillProgress;
+        }
+
+        public Response UpdateSkillProgressStatus(int userId, int skillId, string status, SqlConnection connection)
+        {
+            Response response = new Response();
+
+            try
+            {
+                string query = @"UPDATE skill_progress SET status = @Status WHERE user_id = @UserId AND skill_id = @SkillId";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@UserId", userId);
+                    cmd.Parameters.AddWithValue("@SkillId", skillId);
+                    cmd.Parameters.AddWithValue("@Status", status);
+
+                    connection.Open();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    connection.Close();
+
+                    if (rowsAffected > 0)
+                    {
+                        response.StatusCode = 200;
+                        response.StatusMessage = "Skill progress status updated successfully.";
+                    }
+                    else
+                    {
+                        response.StatusCode = 404; // Assuming 404 for not found
+                        response.StatusMessage = "Skill progress not found.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500; // Internal server error
+                response.StatusMessage = "Error updating skill progress status: " + ex.Message;
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
+                    connection.Close();
+            }
+
+            return response;
+        }
+
+        public Response UpdateUserSkillFeedback(int userId, int skillId, string feedback, SqlConnection connection)
+        {
+            Response response = new Response();
+
+            try
+            {
+                string query = @"UPDATE skill_progress SET feedback = @Feedback WHERE user_ID = @UserId AND skill_ID = @SkillId";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@UserId", userId);
+                    cmd.Parameters.AddWithValue("@SkillId", skillId);
+                    cmd.Parameters.AddWithValue("@Feedback", feedback);
+
+                    connection.Open();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    connection.Close();
+
+                    if (rowsAffected > 0)
+                    {
+                        response.StatusCode = 200;
+                        response.StatusMessage = "User skill feedback updated successfully.";
+                    }
+                    else
+                    {
+                        response.StatusCode = 404; // Assuming 404 for not found
+                        response.StatusMessage = "User skill not found.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500; // Internal server error
+                response.StatusMessage = "Error updating user skill feedback: " + ex.Message;
+            }
+            finally
+            {
+                if (connection.State == ConnectionState.Open)
+                    connection.Close();
+            }
+
+            return response;
+        }
+
+        public Response AddSkillProgress(int userId, string skillId, SqlConnection connection)
+        {
+            Response response = new Response();
+
+            try
+            {
+                string query = @"INSERT INTO skill_progress (user_ID, skill_ID) VALUES (@UserId, @SkillId)";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@UserId", userId);
+                    cmd.Parameters.AddWithValue("@SkillId", skillId);
+
+                    connection.Open();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    connection.Close();
+
+                    if (rowsAffected > 0)
+                    {
+                        response.StatusCode = 200;
+                        response.StatusMessage = "Skill progress added successfully.";
+                    }
+                    else
+                    {
+                        response.StatusCode = 100; // Adjust as needed
+                        response.StatusMessage = "Skill progress addition failed.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500;
+                response.StatusMessage = "An error occurred: " + ex.Message;
             }
 
             return response;
