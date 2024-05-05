@@ -242,6 +242,27 @@ namespace LittleGymManagementBackend.Controllers
                 return StatusCode(500, new Response { StatusCode = 500, StatusMessage = "Internal server error: " + ex.Message });
             }
         }
+        //visualization
+        [HttpGet]
+        [Route("getAllUsers")]
+        public ActionResult<List<Users>> GetAllUsers()
+        {
+            List<Users> users = new List<Users>();
+            try
+            {
+                string connectionString = _configuration.GetConnectionString("LittleGymManagementDb");
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    DAL classDAL = new DAL();
+                    users = classDAL.GetAllUsers(connection);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle exception
+            }
+            return users;
+        }
 
     }
 }

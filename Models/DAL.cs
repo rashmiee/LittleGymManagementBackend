@@ -1421,6 +1421,45 @@ namespace LittleGymManagementBackend.Models
 
             return response;
         }
+        //visualization
+        public List<Users> GetAllUsers(SqlConnection connection)
+        {
+            List<Users> users = new List<Users>();
+            try
+            {
+                string query = @"SELECT ID, FirstName, LastName, Email, Type, Status, CreatedOn, IsApproved, PhoneNo, UserEmail 
+                         FROM Users";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Users user = new Users
+                            {
+                                ID = Convert.ToInt32(reader["ID"]),
+                                FirstName = reader["FirstName"].ToString(),
+                                LastName = reader["LastName"].ToString(),
+                                Email = reader["Email"].ToString(),
+                                Type = reader["Type"].ToString(),
+                                CreatedOn = Convert.ToDateTime(reader["CreatedOn"]),
+                                PhoneNo = reader["PhoneNo"].ToString(),
+                                UserEmail = reader["UserEmail"].ToString()
+                            };
+                            users.Add(user);
+                        }
+                    }
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return users;
+        }
 
     }
 }
