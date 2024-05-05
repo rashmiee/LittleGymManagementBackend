@@ -1173,13 +1173,16 @@ namespace LittleGymManagementBackend.Models
             return response;
         }
 
-        public List<Skill> GetFinishedSkillsForUser(int userId, SqlConnection connection)
+        public List<SkillProgressData> GetFinishedSkillsForUser(int userId, SqlConnection connection)
         {
-            List<Skill> finishedSkills = new List<Skill>();
+            List<SkillProgressData> finishedSkills = new List<SkillProgressData>();
 
             try
             {
-                SqlCommand cmd = new SqlCommand("SELECT s.* FROM Skills s INNER JOIN skill_progress sp ON s.Skill_ID = sp.skill_id WHERE sp.user_id = @UserId AND sp.status = 'Completed'", connection);
+                SqlCommand cmd = new SqlCommand(@"SELECT s.Skill_ID, s.Name, s.Description, sp.status, sp.feedback 
+                                           FROM Skills s 
+                                           INNER JOIN skill_progress sp ON s.Skill_ID = sp.skill_id 
+                                           WHERE sp.user_id = @UserId AND sp.status = 'Completed'", connection);
                 cmd.Parameters.AddWithValue("@UserId", userId);
 
                 connection.Open();
@@ -1187,13 +1190,15 @@ namespace LittleGymManagementBackend.Models
 
                 while (reader.Read())
                 {
-                    Skill skill = new Skill
+                    SkillProgressData skillProgressData = new SkillProgressData
                     {
                         Skill_ID = Convert.ToInt32(reader["Skill_ID"]),
                         Name = reader["Name"].ToString(),
-                        Description = reader["Description"].ToString()
+                        Description = reader["Description"].ToString(),
+                        Status = reader["status"].ToString(),
+                        Feedback = reader["feedback"].ToString()
                     };
-                    finishedSkills.Add(skill);
+                    finishedSkills.Add(skillProgressData);
                 }
 
                 reader.Close();
