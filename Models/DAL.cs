@@ -1421,6 +1421,204 @@ namespace LittleGymManagementBackend.Models
 
             return response;
         }
+
+        public Response AddClassRegistration(ClassRegistration classregistration, SqlConnection connection)
+        {
+            Response response = new Response();
+            try
+            {
+                string query = @"INSERT INTO ClassRegistration (user_id, class_session_id, payment, register_date) 
+                             VALUES (@user_id, @class_session_id, @Payment, @register_date)";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    DateTime currentDate = DateTime.Now;
+                    string formattedDate = currentDate.ToString("yyyy-MM-dd HH:mm:ss.fff");
+
+                    cmd.Parameters.AddWithValue("@user_id", classregistration.User_id);
+                    cmd.Parameters.AddWithValue("@class_session_id", classregistration.Class_session_id);
+                    cmd.Parameters.AddWithValue("@Payment", classregistration.Payment);
+                    cmd.Parameters.AddWithValue("@register_date", formattedDate);
+
+                    connection.Open();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    connection.Close();
+
+                    if (rowsAffected > 0)
+                    {
+                        response.StatusCode = 200;
+                        response.StatusMessage = "Class registration created.";
+                    }
+                    else
+                    {
+                        response.StatusCode = 100;
+                        response.StatusMessage = "Class registration creation failed.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500;
+                response.StatusMessage = "An error occurred: " + ex.Message;
+            }
+
+            return response;
+        }
+
+        public List<ClassRegistration> GetClassRegistrationsByClassSession(int class_session_id, SqlConnection connection)
+        {
+            List<ClassRegistration> registrations = new List<ClassRegistration>();
+            try
+            {
+                string query = @"SELECT * FROM ClassRegistration WHERE class_session_id = @class_session_id";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@class_session_id", class_session_id);
+                    connection.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            ClassRegistration registration = new ClassRegistration
+                            {
+                                Registration_id = Convert.ToInt32(reader["registration_id"]),
+                                User_id = Convert.ToInt32(reader["user_id"]),
+                                Class_session_id = Convert.ToInt32(reader["class_session_id"]),
+                                Payment = Convert.ToBoolean(reader["payment"]),
+                                Register_date = Convert.ToDateTime(reader["register_date"])
+                            };
+                            registrations.Add(registration);
+                        }
+                    }
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                throw ex;
+            }
+
+            return registrations;
+        }
+
+        public List<ClassRegistration> GetClassRegistrationsByUser(int user_id, SqlConnection connection)
+        {
+            List<ClassRegistration> registrations = new List<ClassRegistration>();
+            try
+            {
+                string query = @"SELECT * FROM ClassRegistration WHERE user_id = @user_id";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@user_id", user_id);
+                    connection.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            ClassRegistration registration = new ClassRegistration
+                            {
+                                Registration_id = Convert.ToInt32(reader["registration_id"]),
+                                User_id = Convert.ToInt32(reader["user_id"]),
+                                Class_session_id = Convert.ToInt32(reader["class_session_id"]),
+                                Payment = Convert.ToBoolean(reader["payment"]),
+                                Register_date = Convert.ToDateTime(reader["register_date"])
+                            };
+                            registrations.Add(registration);
+                        }
+                    }
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                throw ex;
+            }
+
+            return registrations;
+        }
+
+        public Response UpdateClassRegistration(ClassRegistration registration, SqlConnection connection)
+        {
+            Response response = new Response();
+            try
+            {
+                string query = @"UPDATE ClassRegistration 
+                             SET user_id = @user_id, class_session_id = @class_session_id, 
+                                 payment = @Payment, register_date = @register_date
+                             WHERE registration_id = @registration_id";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@user_id", registration.User_id);
+                    cmd.Parameters.AddWithValue("@class_session_id", registration.Class_session_id);
+                    cmd.Parameters.AddWithValue("@Payment", registration.Payment);
+                    cmd.Parameters.AddWithValue("@register_date", registration.Register_date);
+                    cmd.Parameters.AddWithValue("@registration_id", registration.Registration_id);
+
+                    connection.Open();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    connection.Close();
+
+                    if (rowsAffected > 0)
+                    {
+                        response.StatusCode = 200;
+                        response.StatusMessage = "Class registration updated.";
+                    }
+                    else
+                    {
+                        response.StatusCode = 100;
+                        response.StatusMessage = "Class registration update failed.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500;
+                response.StatusMessage = "An error occurred: " + ex.Message;
+            }
+
+            return response;
+        }
+
+        public Response DeleteClassRegistration(int registration_id, SqlConnection connection)
+        {
+            Response response = new Response();
+            try
+            {
+                string query = @"DELETE FROM ClassRegistration WHERE registration_id = @registration_id";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.AddWithValue("@registration_id", registration_id);
+
+                    connection.Open();
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    connection.Close();
+
+                    if (rowsAffected > 0)
+                    {
+                        response.StatusCode = 200;
+                        response.StatusMessage = "Class registration deleted.";
+                    }
+                    else
+                    {
+                        response.StatusCode = 100;
+                        response.StatusMessage = "Class registration deletion failed.";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                response.StatusCode = 500;
+                response.StatusMessage = "An error occurred: " + ex.Message;
+            }
+
+            return response;
+        }
         //visualization
         public List<Users> GetAllUsers(SqlConnection connection)
         {
