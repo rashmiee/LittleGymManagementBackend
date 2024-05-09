@@ -128,5 +128,28 @@ namespace LittleGymManagementBackend.Controllers
 
             return response;
         }
+
+        [HttpGet]
+        [Route("getAllClassRegistrations")]
+        public ActionResult<List<ClassRegistration>> GetAllClassRegistrations()
+        {
+            List<ClassRegistration> registrations = new List<ClassRegistration>();
+            try
+            {
+                string connectionString = _configuration.GetConnectionString("LittleGymManagementDb");
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    DAL classDAL = new DAL();
+                    registrations = classDAL.GetAllClassRegistrations(connection);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, "An error occurred: " + ex.Message);
+            }
+
+            return registrations;
+        }
     }
 }

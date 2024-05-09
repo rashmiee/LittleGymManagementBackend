@@ -1659,5 +1659,41 @@ namespace LittleGymManagementBackend.Models
             return users;
         }
 
+        public List<ClassRegistration> GetAllClassRegistrations(SqlConnection connection)
+        {
+            List<ClassRegistration> registrations = new List<ClassRegistration>();
+            try
+            {
+                string query = @"SELECT * FROM ClassRegistration";
+
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    connection.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            ClassRegistration registration = new ClassRegistration
+                            {
+                                Registration_id = Convert.ToInt32(reader["registration_id"]),
+                                User_id = Convert.ToInt32(reader["user_id"]),
+                                Class_session_id = Convert.ToInt32(reader["class_session_id"]),
+                                Payment = Convert.ToBoolean(reader["payment"]),
+                                Register_date = Convert.ToDateTime(reader["register_date"])
+                            };
+                            registrations.Add(registration);
+                        }
+                    }
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                throw ex;
+            }
+
+            return registrations;
+        }
     }
 }
