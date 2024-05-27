@@ -11,6 +11,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static System.Net.WebRequestMethods;
+using System.Web.Http;
+using System.Web.Http.Cors;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LittleGymManagementBackend
 {
@@ -25,7 +28,19 @@ namespace LittleGymManagementBackend
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowReactApp",
+                builder => builder
+                    .WithOrigins("http://localhost:3000")
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials());
+                    });
             services.AddControllers();
+            services.AddControllersWithViews();
+            services.AddRazorPages();
+            services.AddMvc();
         }
         // This method gets called by the runtime.Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -43,12 +58,18 @@ namespace LittleGymManagementBackend
 
             // Configure middleware
             app.UseHttpsRedirection();
+            app.UseCors("AllowReactApp");
             app.UseRouting();
             app.UseAuthorization();
+            app.UseStaticFiles();
+            // Enable CORS for requests from http://localhost:3000
+            app.UseCors("AllowLocalhost3000");
+            //app.UseCors(options => options.WithOrigins("*").AllowAnyMethod().AllowAnyHeader() );
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapRazorPages();
             });
         }
     }
