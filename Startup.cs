@@ -14,6 +14,7 @@ using static System.Net.WebRequestMethods;
 using System.Web.Http;
 using System.Web.Http.Cors;
 using Microsoft.Extensions.DependencyInjection;
+using LittleGymManagementBackend.Hubs;
 
 namespace LittleGymManagementBackend
 {
@@ -37,10 +38,12 @@ namespace LittleGymManagementBackend
                     .AllowAnyHeader()
                     .AllowCredentials());
                     });
+            services.AddSignalR();
             services.AddControllers();
             services.AddControllersWithViews();
             services.AddRazorPages();
             services.AddMvc();
+
         }
         // This method gets called by the runtime.Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -65,7 +68,8 @@ namespace LittleGymManagementBackend
             // Enable CORS for requests from http://localhost:3000
             app.UseCors("AllowLocalhost3000");
             //app.UseCors(options => options.WithOrigins("*").AllowAnyMethod().AllowAnyHeader() );
-
+            //app.MapHub<ChatHub>(pattern: "/Chat");
+           
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
